@@ -50,7 +50,12 @@ fun GroceryApp() {
                 val currentDestination = navBackStackEntry?.destination
                 items.forEach { screen ->
                     NavigationBarItem(
-                        icon = { Icon(painterResource(id = screen.iconResourceId), contentDescription = null) },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = screen.iconResourceId),
+                                contentDescription = null
+                            )
+                        },
                         label = { Text(stringResource(screen.resourceId)) },
                         selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                         onClick = {
@@ -67,22 +72,23 @@ fun GroceryApp() {
             }
         }
     ) { innerPadding ->
-        NavHost(navController, startDestination = Screen.GroceryList.route, Modifier.padding(innerPadding)) {
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Recipes.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
             composable(Screen.Recipes.route) {
                 RecipesScreen(
                     onNavigateToRecipeDetails = { recipeId ->
-                        // TODO: Implement navigation to recipe details
+                        navController.navigate("recipeDetail/$recipeId")
                     }
                 )
             }
-            composable(Screen.Kitchen.route) {
-                // TODO: Implement KitchenScreen
-            }
 
-            composable("newGroceryList") {
-                NewGroceryListScreen(
-                    onNavigateBack = {
-                        navController.popBackStack()
+            composable(Screen.Kitchen.route) {
+                KitchenScreen(
+                    onNavigateToUnitManager = {
+                        navController.navigate("unitManager")
                     }
                 )
             }
@@ -94,6 +100,14 @@ fun GroceryApp() {
                     },
                     onNavigateToNewList = {
                         navController.navigate("newGroceryList")
+                    }
+                )
+            }
+
+            composable("newGroceryList") {
+                NewGroceryListScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
                     }
                 )
             }

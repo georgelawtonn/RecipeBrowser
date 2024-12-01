@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +31,7 @@ fun GroceryListDetailScreen(
     val groceryItems by viewModel.getGroceryItems(groceryListId).collectAsState(initial = emptyList())
     var showAddItemDialog by remember { mutableStateOf(false) }
     var editingItem by remember { mutableStateOf<GroceryItem?>(null) }
+    var showDeleteConfirmation by remember { mutableStateOf<GroceryItem?>(null) }
 
     LaunchedEffect(groceryListId) {
         viewModel.loadGroceryList(groceryListId)
@@ -72,19 +75,48 @@ fun GroceryListDetailScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(groceryItems) { item ->
-                        GroceryItemRow(
-                            item = item,
-                            unit = viewModel.getUnitById(item.unitId),
-                            onItemClick = { editingItem = it },
-                            onCheckedChange = { checked ->
-                                viewModel.updateGroceryItemCheckedStatus(item.copy(isChecked = checked))
+                    items(
+                        items = groceryItems,
+                        key = { it.id }
+                    ) { item ->
+                        ListItem(
+                            headlineContent = {
+                                Text(item.name)
+                            },
+                            supportingContent = {
+                                Text(
+                                    "${item.quantity} ${viewModel.getUnitById(item.unitId)?.abbreviation ?: ""}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            },
+                            leadingContent = {
+                                Checkbox(
+                                    checked = item.isChecked,
+                                    onCheckedChange = { checked ->
+                                        viewModel.updateGroceryItemCheckedStatus(item.copy(isChecked = checked))
+                                    }
+                                )
+                            },
+                            trailingContent = {
+                                Row {
+                                    IconButton(onClick = { editingItem = item }) {
+                                        Icon(
+                                            Icons.Default.Edit,
+                                            contentDescription = "Edit item"
+                                        )
+                                    }
+                                    IconButton(onClick = { showDeleteConfirmation = item }) {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = "Delete item",
+                                            tint = MaterialTheme.colorScheme.tertiary
+                                        )
+                                    }
+                                }
                             }
                         )
-                        Divider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        )
+                        Divider()
                     }
                 }
             }
@@ -107,6 +139,32 @@ fun GroceryListDetailScreen(
                     onNavigateToUnitManager = onNavigateToUnitManager
                 )
             }
+
+            showDeleteConfirmation?.let { item ->
+                AlertDialog(
+                    onDismissRequest = { showDeleteConfirmation = null },
+                    title = { Text("Delete Item") },
+                    text = { Text("Are you sure you want to delete '${item.name}'?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                viewModel.deleteGroceryItem(item)
+                                showDeleteConfirmation = null
+                            },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Text("Delete")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDeleteConfirmation = null }) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
         }
     }
 }
@@ -127,39 +185,5 @@ private fun EmptyListMessage(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-    }
-}
-
-@Composable
-private fun GroceryItemRow(
-    item: GroceryItem,
-    unit: MeasurementUnit?,
-    onItemClick: (GroceryItem) -> Unit,
-    onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onItemClick(item) }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(
-            checked = item.isChecked,
-            onCheckedChange = onCheckedChange
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = item.name,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = "${item.quantity} ${unit?.abbreviation ?: ""}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
     }
 }
