@@ -17,4 +17,7 @@ interface KitchenDao {
 
     @Delete
     suspend fun delete(item: KitchenItem)
+
+    @Query("SELECT * FROM kitchen_items")
+    suspend fun getAllItemsOneShot(): List<KitchenItem>
 }

@@ -2,6 +2,7 @@ package com.example.recipebrowserc.data.dao
 
 import androidx.room.*
 import com.example.recipebrowserc.data.entity.Recipe
+import com.example.recipebrowserc.data.model.RecipeWithIngredients
 import com.example.recipebrowserc.data.model.RecipeWithInstructions
 import kotlinx.coroutines.flow.Flow
 
@@ -28,4 +29,16 @@ interface RecipeDao {
 
     @Query("SELECT * FROM recipes WHERE id = :recipeId")
     suspend fun getRecipeById(recipeId: Int): Recipe?
+
+    @Query("SELECT * FROM recipes")
+    suspend fun getAllRecipesOneShot(): List<Recipe>
+
+    @Query("SELECT * FROM recipes WHERE name LIKE :query OR author LIKE :query")
+    suspend fun searchRecipesOneShot(query: String): List<Recipe>
+
+    @Transaction
+    @Query("SELECT * FROM recipes")
+    suspend fun getAllRecipesWithIngredients(): List<RecipeWithIngredients>
+
+
 }

@@ -81,6 +81,9 @@ fun GroceryApp() {
                 RecipesScreen(
                     onNavigateToRecipeDetails = { recipeId ->
                         navController.navigate("recipeDetail/$recipeId")
+                    },
+                    onNavigateToAddRecipe = {
+                        navController.navigate("addRecipe")
                     }
                 )
             }
@@ -100,6 +103,55 @@ fun GroceryApp() {
                     },
                     onNavigateToNewList = {
                         navController.navigate("newGroceryList")
+                    }
+                )
+            }
+
+            composable("addRecipe") {
+                AddEditRecipeScreen(
+                    recipeId = null,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onNavigateToUnitManager = {
+                        navController.navigate("unitManager")
+                    }
+                )
+            }
+
+            composable(
+                route = "editRecipe/{recipeId}",
+                arguments = listOf(navArgument("recipeId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val recipeId = backStackEntry.arguments?.getInt("recipeId") ?: return@composable
+                AddEditRecipeScreen(
+                    recipeId = recipeId,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onNavigateToUnitManager = {
+                        navController.navigate("unitManager")
+                    }
+                )
+            }
+
+            composable(
+                route = "recipeDetail/{recipeId}",
+                arguments = listOf(navArgument("recipeId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val recipeId = backStackEntry.arguments?.getInt("recipeId") ?: return@composable
+                RecipeDetailScreen(
+                    recipeId = recipeId,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onNavigateToGroceryList = { groceryListId ->
+                        navController.navigate("groceryListDetail/$groceryListId") {
+                            popUpTo("recipeDetail/$recipeId")
+                        }
+                    },
+                    onNavigateToEdit = { recipeToEditId ->
+                        navController.navigate("editRecipe/$recipeToEditId")
                     }
                 )
             }

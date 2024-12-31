@@ -23,4 +23,5 @@ interface RecipeInstructionDao {
 
     @Query("DELETE FROM recipe_instructions WHERE recipeId = :recipeId")
     suspend fun deleteAllInstructionsForRecipe(recipeId: Int): Int
+
 }
