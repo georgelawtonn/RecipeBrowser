@@ -26,10 +26,12 @@ fun RecipeDetailScreen(
     viewModel: RecipeDetailViewModel = hiltViewModel()
 ) {
     var showAddToGroceryListDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
     val recipe by viewModel.recipe.collectAsState()
     val ingredients by viewModel.ingredients.collectAsState(initial = emptyList())
     val instructions by viewModel.instructions.collectAsState(initial = emptyList())
     val groceryLists by viewModel.groceryLists.collectAsState(initial = emptyList())
+
 
     LaunchedEffect(recipeId) {
         viewModel.loadRecipe(recipeId)
@@ -48,7 +50,15 @@ fun RecipeDetailScreen(
                     IconButton(onClick = { onNavigateToEdit(recipeId) }) {
                         Icon(Icons.Default.Edit, contentDescription = "Edit recipe")
                     }
+                    IconButton(onClick = { showDeleteConfirmation = true }) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete recipe",
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
                 }
+
             )
         }
     ) { paddingValues ->
@@ -251,6 +261,33 @@ fun RecipeDetailScreen(
                         }
                     ) {
                         Text(if (showNewListInput) "Back" else "Cancel")
+                    }
+                }
+            )
+        }
+
+        if (showDeleteConfirmation) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirmation = false },
+                title = { Text("Delete Recipe") },
+                text = { Text("Are you sure you want to delete '${recipe?.name}'?") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.deleteRecipe(recipeId)
+                            showDeleteConfirmation = false
+                            onNavigateBack()
+                        },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirmation = false }) {
+                        Text("Cancel")
                     }
                 }
             )

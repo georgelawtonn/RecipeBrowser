@@ -62,6 +62,12 @@ class RecipeDetailViewModel @Inject constructor(
         return listId
     }
 
+    fun deleteRecipe(recipeId: Int) {
+        viewModelScope.launch {
+            recipe.value?.let { recipeDao.delete(it) }
+        }
+    }
+
     fun addIngredientsToGroceryList(groceryListId: Int) {
         viewModelScope.launch {
             ingredients.value.forEach { ingredient ->
