@@ -33,14 +33,3 @@ An Android application built with Jetpack Compose that helps users manage recipe
 - ViewModel & StateFlow for state management
 - Navigation Component for screen navigation
 
-### Architecture
-- MVVM (Model-View-ViewModel) architecture
-- Clean separation of concerns
-- Repository pattern for data operations
-- Single activity, multiple composable screens
-
-### Database Schema
-- Recipes with ingredients and instructions
-- Kitchen inventory items
-- Grocery lists and items
-- Measurement units with categories
